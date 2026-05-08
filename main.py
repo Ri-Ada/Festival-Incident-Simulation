@@ -14,7 +14,7 @@ class Fire(Incident):
         self.__type=type
     def resolve(self):
         pass
-    def escalare(self):
+    def escalate(self):
         pass
 class Overdose(Incident):
     def __init__(self, drug, severity):
@@ -37,6 +37,11 @@ class ResolutionReport:
         self._success=success
         self._message=message
         self._type=type
+    @property
+    def success(self):
+        return self._success
+    def __str__(self):
+        return f"[{self._type}] {self._message}"
 class SimulationEngine:
     def __init__(self):
         self._active_incidents=[]
