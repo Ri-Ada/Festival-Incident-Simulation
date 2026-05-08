@@ -7,6 +7,7 @@ class Incident(ABC):
     @abstractmethod
     def resolve(self):
         pass
+    @abstractmethod
     def escalate(self):
         pass
 class Fire(Incident):
@@ -24,7 +25,7 @@ class Fire(Incident):
         self.escalate()
         return ResolutionReport(
             False,
-            "Fire spreading",
+            "Fire spreading.Run.",
             self.__type
         )
     def escalate(self):
@@ -32,24 +33,52 @@ class Fire(Incident):
 class Overdose(Incident):
     def __init__(self, drug, severity):
         super().__init__(severity)
-        self._drug=drug
+        self.__drug=drug
     def resolve(self):
-        pass
+        drug_difficulty={
+            "nitrous_oxide":0.2,
+            "ketamine":0.4,
+            "opioid":0.6,
+            "fentanyl":0.8,
+            "unknown":0.5
+        }
+        base_success=drug_difficulty.get(self._drug, 0.5)
+        success = random.random() < base_success
+        if success:
+            return ResolutionReport(
+                True, 
+                "Patient stabilised",
+                "Overdose",
+                {
+                    "drug":self.__drug,
+                }
+            )
+        self.escalate()
+        return ResolutionReport(
+            False,
+            "Doctors praying as intervention is ongoing",
+            "Overdose",
+            {
+                "drug":self.__drug
+            }
+        )
+
     def escalate(self):
-        pass
+        self._severity=min(10, self._severity + 1)
 class DrunkFight(Incident):
     def __init__(self, severity, people_count):
         super().__init__(severity)
-        self._people_count=people_count
+        self.__people_count=people_count
     def resolve(self):
         pass
     def escalate(self):
         pass
 class ResolutionReport:
-    def __init__(self, success, message, type):
+    def __init__(self, success, message, type, metadata=None):
         self._success=success
         self._message=message
         self._type=type
+        self._metadata=metadata or {}
     @property
     def success(self):
         return self._success
