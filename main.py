@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import random
 
 class Incident(ABC):
     def __init__(self, severity):
@@ -13,9 +14,21 @@ class Fire(Incident):
         super().__init__(severity)
         self.__type=type
     def resolve(self):
-        pass
+        success=random.random() > 0.3
+        if success:
+            return ResolutionReport(
+                True,
+                "Fire extinguised",
+                self.__type
+            )
+        self.escalate()
+        return ResolutionReport(
+            False,
+            "Fire spreading",
+            self.__type
+        )
     def escalate(self):
-        pass
+        self._severity=min(10, self._severity +2)
 class Overdose(Incident):
     def __init__(self, drug, severity):
         super().__init__(severity)
