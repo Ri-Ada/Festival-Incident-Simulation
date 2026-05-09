@@ -140,6 +140,10 @@ class SimulationEngine:
     def __init__(self):
         self._active_incidents=[]
         self._reports=[]
+    def add_incident(self, incident):
+        self._active_incidents.append(incident)
+    def get_reports(self):
+        return self._reports
     def tick(self):
         new_incidents=[]
         for incident in self._active_incidents:
@@ -152,7 +156,9 @@ class SimulationEngine:
             if not report.success:
                 new_incidents.append(incident)
         self._active_incidents=new_incidents
-
+    def run(self, steps):
+        for _ in range(steps):
+            self.tick()
 class IncidentFactory:
     @staticmethod
     def create_incident():
