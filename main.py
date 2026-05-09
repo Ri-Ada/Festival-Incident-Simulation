@@ -70,9 +70,22 @@ class DrunkFight(Incident):
         super().__init__(severity)
         self.__people_count=people_count
     def resolve(self):
-        pass
+        success_rate=max(0.1, 0.8-self.__people_count * 0.05)
+        success=random.random() < success_rate
+        if success:
+            return ResolutionReport(
+                True, 
+                "Fight was solved by security",
+                "DrunkFight"
+            )
+        self.escalate()
+        return ResolutionReport(
+            False, 
+            "Seems like we have the whole UFC division out there.",
+            "DrunkFight"
+        )
     def escalate(self):
-        pass
+        self._severity=min(10, self._severity +1)
 class ResolutionReport:
     def __init__(self, success, message, type, metadata=None):
         self._success=success
