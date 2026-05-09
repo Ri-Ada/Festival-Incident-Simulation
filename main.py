@@ -28,7 +28,7 @@ class Fire(Incident):
         if success:
             return ResolutionReport(
                 True,
-                "Fire extinguised",
+                "Fire is extinguished",
                 self.__type
             )
         self.escalate()
@@ -88,7 +88,7 @@ class DrunkFight(Incident):
         if success:
             return ResolutionReport(
                 True, 
-                "Fight was solved by security",
+                "Fight was broken up by security",
                 "DrunkFight"
             )
         self.escalate()
@@ -115,13 +115,13 @@ class Riot(Incident):
         if success:
             return ResolutionReport(
                 True, 
-                "Riot under control, thanks to the millitary.",
+                "Riot under control, thanks to the military.",
                 "Riot"
             )
         self.escalate()
         return ResolutionReport(
             False,
-            "Frenchmans decided to stsrt another revolution today. Waiting for group Alpha",
+            "The French decided to start another revolution today. Waiting for group Alpha",
             "Riot"
         )
     def escalate(self):
@@ -162,5 +162,17 @@ class SimulationEngine:
 class IncidentFactory:
     @staticmethod
     def create_incident():
-        pass
+        choice=random.choice(["fire", "overdose", "fight"])
+        if choice == "fire":
+            fire_type=random.choice(["electrical", "gas", "chemical"])
+            severity = random.randint(1, 5)
+            return Fire(severity, fire_type)
+        if choice =="overdose":
+            drug=random.choice(["nitrous_oxide", "ketamine", "opioid", "fentanyl"])
+            severity=random.randint(1, 5)
+            return Overdose(drug, severity)
+        if choice == "fight":
+            severity=random.randint(1, 5)
+            people_count=random.randint(1, 5)
+            return DrunkFight(severity, people_count)
 
