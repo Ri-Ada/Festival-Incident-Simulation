@@ -13,11 +13,18 @@ class Incident(ABC):
     def transform(self):
         return None
 class Fire(Incident):
-    def __init__(self, severity, type):
+    def __init__(self, severity, fire_type):
         super().__init__(severity)
-        self.__type=type
+        self.__type=fire_type
     def resolve(self):
-        success=random.random() > 0.3
+        fire_difficulty={
+            "electrical":0.4,
+            "gas": 0.4,
+            "chemical":0.6        
+            }
+        base_success=fire_difficulty.get(self.__type, 0.5)
+        success_rate=max(0.05, base_success - self._severity * 0.02)
+        success=random.random() < success_rate
         if success:
             return ResolutionReport(
                 True,
@@ -45,7 +52,8 @@ class Overdose(Incident):
             "unknown":0.5
         }
         base_success=drug_difficulty.get(self.__drug, 0.5)
-        success = random.random() < base_success
+        success_rate=max(0.05, base_success - self._severity * 0.03)
+        success = random.random() < success_rate
         if success:
             return ResolutionReport(
                 True, 
@@ -73,7 +81,9 @@ class DrunkFight(Incident):
             )
         return None
     def resolve(self):
-        success_rate=max(0.1, 0.8-self.__people_count * 0.05)
+        success_rate=max(
+            0.1,
+            0.8-self.__people_count * 0.05 - self._severity*0.02)
         success=random.random() < success_rate
         if success:
             return ResolutionReport(
@@ -98,7 +108,9 @@ class Riot(Incident):
     def people_count(self):
         return self.__people_count
     def resolve(self):
-        success_rate=max(0.05, 0.6 - self.__people_count*0.02)
+        success_rate=max(
+            0.05,
+            0.6 - self.__people_count*0.02-self._severity*0.02)
         success=random.random() < success_rate
         if success:
             return ResolutionReport(
@@ -145,5 +157,4 @@ class IncidentFactory:
     @staticmethod
     def create_incident():
         pass
-
 
