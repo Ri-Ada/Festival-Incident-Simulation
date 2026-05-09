@@ -42,7 +42,7 @@ class Overdose(Incident):
             "fentanyl":0.8,
             "unknown":0.5
         }
-        base_success=drug_difficulty.get(self._drug, 0.5)
+        base_success=drug_difficulty.get(self.__drug, 0.5)
         success = random.random() < base_success
         if success:
             return ResolutionReport(
@@ -86,6 +86,27 @@ class DrunkFight(Incident):
         )
     def escalate(self):
         self._severity=min(10, self._severity +1)
+class Riot(Incident):
+    def __init__(self, severity, people_count):
+        super().__init__(severity)
+        self.__people_count=people_count
+    def resolve(self):
+        success_rate=max(0.05, 0.6 - self.__people_count*0.02)
+        success=random.random() < success_rate
+        if success:
+            return ResolutionReport(
+                True, 
+                "Riot under control, thanks to the millitary.",
+                "Riot"
+            )
+        self.escalate()
+        return ResolutionReport(
+            False,
+            "Frenchmans decided to stsrt another revolution today. Waiting for group Alpha",
+            "Riot"
+        )
+    def escalate(self):
+        self._severity=min(10, self._severity+3)
 class ResolutionReport:
     def __init__(self, success, message, type, metadata=None):
         self._success=success
