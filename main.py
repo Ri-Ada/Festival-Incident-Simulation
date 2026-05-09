@@ -10,6 +10,8 @@ class Incident(ABC):
     @abstractmethod
     def escalate(self):
         pass
+    def transform(self):
+        return None
 class Fire(Incident):
     def __init__(self, severity, type):
         super().__init__(severity)
@@ -48,19 +50,13 @@ class Overdose(Incident):
             return ResolutionReport(
                 True, 
                 "Patient stabilised",
-                "Overdose",
-                {
-                    "drug":self.__drug,
-                }
+                "Overdose"
             )
         self.escalate()
         return ResolutionReport(
             False,
             "Doctors praying as intervention is ongoing",
-            "Overdose",
-            {
-                "drug":self.__drug
-            }
+            "Overdose"
         )
 
     def escalate(self):
@@ -69,6 +65,13 @@ class DrunkFight(Incident):
     def __init__(self, severity, people_count):
         super().__init__(severity)
         self.__people_count=people_count
+    def transform(self):
+        if self.__people_count >= 20:
+            return Riot(
+                self._severity,
+                self.__people_count
+            )
+        return None
     def resolve(self):
         success_rate=max(0.1, 0.8-self.__people_count * 0.05)
         success=random.random() < success_rate
@@ -86,10 +89,14 @@ class DrunkFight(Incident):
         )
     def escalate(self):
         self._severity=min(10, self._severity +1)
+        self.__people_count += random.randint(1, 5)
 class Riot(Incident):
     def __init__(self, severity, people_count):
         super().__init__(severity)
         self.__people_count=people_count
+    @property
+    def people_count(self):
+        return self.__people_count
     def resolve(self):
         success_rate=max(0.05, 0.6 - self.__people_count*0.02)
         success=random.random() < success_rate
@@ -108,11 +115,10 @@ class Riot(Incident):
     def escalate(self):
         self._severity=min(10, self._severity+3)
 class ResolutionReport:
-    def __init__(self, success, message, type, metadata=None):
+    def __init__(self, success, message, type):
         self._success=success
         self._message=message
         self._type=type
-        self._metadata=metadata or {}
     @property
     def success(self):
         return self._success
@@ -123,7 +129,18 @@ class SimulationEngine:
         self._active_incidents=[]
         self._reports=[]
     def tick(self):
-        pass
+        new_incidents=[]
+        for incident in self._active_incidents:
+            transformed=incident.transform()
+            if transformed:
+                new_incidents.append(transformed)
+                continue
+            report=incident.resolve()
+            self._reports.append(report)
+            if not report.success:
+                new_incidents.append(incident)
+        self._active_incidents=new_incidents
+
 class IncidentFactory:
     @staticmethod
     def create_incident():
